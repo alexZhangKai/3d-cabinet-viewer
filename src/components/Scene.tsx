@@ -40,13 +40,13 @@ function Room() {
 }
 
 function SceneContent() {
-  const { cabinets, height, depth, thickness, setWidth, setShelf } = useCabinetStore()
+  const { cabinets, height, depth, thickness, setWidth, setShelf, draggingModelId } = useCabinetStore()
   const { drag, setDrag } = useDrag()
   const orbitRef = useRef<OrbitControlsImpl>(null)
 
   useEffect(() => {
-    if (orbitRef.current) orbitRef.current.enabled = !drag
-  }, [drag])
+    if (orbitRef.current) orbitRef.current.enabled = !drag && !draggingModelId
+  }, [drag, draggingModelId])
 
   const totalWidth = cabinets.reduce((sum, c) => sum + c.width, 0)
   const startX = -totalWidth / 2

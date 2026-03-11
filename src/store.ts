@@ -6,17 +6,30 @@ export type CabinetSpec = {
   shelves: number[]
 }
 
+export type PlacedModel = {
+  instanceId: string
+  cabinetId: string
+  shelfIndex: number
+  modelId: string
+}
+
 interface CabinetState {
   height: number
   depth: number
   thickness: number
   cabinets: CabinetSpec[]
+  placedModels: PlacedModel[]
+  draggingModelId: string | null
   setWidth: (id: string, width: number) => void
   setShelf: (id: string, shelfIndex: number, y: number) => void
   addCabinet: () => void
   removeCabinet: (id: string) => void
   addShelf: (id: string) => void
   removeShelf: (id: string, shelfIndex: number) => void
+  placeDisplayModel: (cabinetId: string, shelfIndex: number, modelId: string) => void
+  removePlacedModel: (instanceId: string) => void
+  startModelDrag: (modelId: string) => void
+  endModelDrag: () => void
 }
 
 export const useCabinetStore = create<CabinetState>((set, get) => ({
@@ -40,6 +53,8 @@ export const useCabinetStore = create<CabinetState>((set, get) => ({
       shelves: [0.4, 0.8, 1.2, 1.6],
     },
   ],
+  placedModels: [],
+  draggingModelId: null,
 
   setWidth: (id, width) => {
     const clamped = Math.max(0.3, Math.min(3.0, width))
@@ -80,7 +95,10 @@ export const useCabinetStore = create<CabinetState>((set, get) => ({
   },
 
   removeCabinet: (id) => {
-    set((state) => ({ cabinets: state.cabinets.filter((c) => c.id !== id) }))
+    set((state) => ({
+      cabinets: state.cabinets.filter((c) => c.id !== id),
+      placedModels: state.placedModels.filter((m) => m.cabinetId !== id),
+    }))
   },
 
   addShelf: (id) => {
@@ -109,6 +127,29 @@ export const useCabinetStore = create<CabinetState>((set, get) => ({
       cabinets: state.cabinets.map((c) =>
         c.id === id ? { ...c, shelves: c.shelves.filter((_, i) => i !== shelfIndex) } : c
       ),
+      placedModels: state.placedModels
+        .filter((m) => !(m.cabinetId === id && m.shelfIndex === shelfIndex))
+        .map((m) =>
+          m.cabinetId === id && m.shelfIndex > shelfIndex
+            ? { ...m, shelfIndex: m.shelfIndex - 1 }
+            : m
+        ),
     }))
   },
+
+  placeDisplayModel: (cabinetId, shelfIndex, modelId) => {
+    const instanceId = crypto.randomUUID()
+    set((state) => ({
+      placedModels: [...state.placedModels, { instanceId, cabinetId, shelfIndex, modelId }],
+    }))
+  },
+
+  removePlacedModel: (instanceId) => {
+    set((state) => ({
+      placedModels: state.placedModels.filter((m) => m.instanceId !== instanceId),
+    }))
+  },
+
+  startModelDrag: (modelId) => set({ draggingModelId: modelId }),
+  endModelDrag: () => set({ draggingModelId: null }),
 }))

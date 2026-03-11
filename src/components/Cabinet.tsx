@@ -6,6 +6,8 @@ const darkWood = <meshStandardMaterial color="#8b5e3c" roughness={0.7} metalness
 import { Vector3 } from 'three'
 import CabinetHandles from './CabinetHandles'
 import CabinetMeasurements from './CabinetMeasurements'
+import ShelfItems from './ShelfItems'
+import ShelfDropZones from './ShelfDropZones'
 
 type CabinetProps = {
   id: string
@@ -68,6 +70,8 @@ export default function Cabinet({ id, position, height, width, depth, shelves, s
         ))
       )}
 
+      <ShelfItems cabinetId={id} width={width} depth={depth} thickness={T} shelves={shelves} />
+      <ShelfDropZones cabinetId={id} width={width} depth={depth} thickness={T} shelves={shelves} />
       <CabinetHandles id={id} width={width} height={height} depth={depth} shelves={shelves} />
       <CabinetMeasurements width={width} height={height} depth={depth} shelves={shelves} showHeightMeasurement={showHeightMeasurement} />
     </group>

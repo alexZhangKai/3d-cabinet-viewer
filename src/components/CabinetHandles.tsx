@@ -44,7 +44,7 @@ export default function CabinetHandles({ id, width, height, depth, shelves }: Ca
             document.body.style.cursor = 'ns-resize'
           }}
         >
-          <boxGeometry args={[width - 0.04, 0.015, 0.015]} />
+          <boxGeometry args={[width * 0.6, 0.015, 0.015]} />
           <meshStandardMaterial color={shelfHover === i ? '#55d6a8' : '#00B894'} />
         </mesh>
       ))}

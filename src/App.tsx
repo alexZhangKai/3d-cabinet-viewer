@@ -1,12 +1,61 @@
+import { useState, useEffect } from 'react'
 import './index.css'
 import Scene from './components/Scene'
 import Controls from './components/Controls'
+import { useCabinetStore } from './store'
+import { DISPLAY_MODELS, modelColor } from './data/displayModels'
 
 export default function App() {
+  const { draggingModelId, endModelDrag } = useCabinetStore()
+  const [mouse, setMouse] = useState({ x: 0, y: 0 })
+
+  useEffect(() => {
+    if (!draggingModelId) return
+    const onMove = (e: MouseEvent) => setMouse({ x: e.clientX, y: e.clientY })
+    const onUp = () => endModelDrag()
+    window.addEventListener('mousemove', onMove)
+    window.addEventListener('mouseup', onUp)
+    return () => {
+      window.removeEventListener('mousemove', onMove)
+      window.removeEventListener('mouseup', onUp)
+    }
+  }, [draggingModelId, endModelDrag])
+
+  const draggingModel = draggingModelId
+    ? DISPLAY_MODELS.find((m) => m.id === draggingModelId)
+    : null
+
   return (
     <div className="w-screen h-screen relative">
       <Scene />
       <Controls />
+
+      {/* TODO(human): render a floating ghost label that follows the cursor while dragging.
+          Use `mouse.x` and `mouse.y` for position, `draggingModel` for the model data,
+          and `modelColor(draggingModel.id)` for the color swatch.
+          Show at minimum: a color swatch + model name. Keep it small (fontSize ~12px).
+          Hint: position: 'fixed', pointerEvents: 'none', zIndex: 999, left: mouse.x + 14, top: mouse.y + 14 */}
+      {draggingModel && (
+        <div style={{
+          position: 'fixed',
+          pointerEvents: 'none',
+          zIndex: 999,
+          left: mouse.x + 14,
+          top: mouse.y + 14,
+        }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'rgba(20,20,20,0.9)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: 6, padding: '5px 10px',
+          }}>
+            <div style={{ width: 10, height: 10, borderRadius: 2, background: modelColor(draggingModel.id), flexShrink: 0 }} />
+            <span style={{ color: '#eee', fontSize: 12, whiteSpace: 'nowrap' }}>
+              {draggingModel.name}
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
