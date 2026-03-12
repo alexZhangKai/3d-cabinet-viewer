@@ -22,7 +22,7 @@ export default function Cabinet({ id, position, height, width, depth, shelves, t
   return (
     <group castShadow position={position}>
       {/* Bottom — depth D-thickness, shifted forward so back face sits at z = -D/2+thickness */}
-      <mesh position={[0, thickness / 2, thickness / 2]}>
+      <mesh position={[0, thickness / 2, 0]}>
         <boxGeometry args={[width, thickness, depth - thickness]} />
         {wood}
       </mesh>
@@ -46,10 +46,10 @@ export default function Cabinet({ id, position, height, width, depth, shelves, t
       </mesh>
 
       {/* Back — outer face flush at z = -depth/2, no coplanar overlap */}
-      <mesh position={[0, height / 2, -depth / 2 + 3 * thickness / 4]}>
+      {/* <mesh position={[0, height / 2, -depth / 2 + 3 * thickness / 4]}>
         <boxGeometry args={[width, height, thickness / 2]} />
         {darkWood}
-      </mesh>
+      </mesh> */}
 
       {/* Shelf */}
       {shelves.map((shelfHeight, index) => (
@@ -71,7 +71,7 @@ export default function Cabinet({ id, position, height, width, depth, shelves, t
 
       <ShelfItems cabinetId={id} width={width} depth={depth} thickness={thickness} shelves={shelves} />
       <ShelfDropZones cabinetId={id} width={width} depth={depth} thickness={thickness} shelves={shelves} />
-      <CabinetHandles id={id} width={width} height={height} depth={depth} shelves={shelves} />
+      <CabinetHandles id={id} width={width} height={height} depth={depth} thickness={thickness} shelves={shelves} />
       <CabinetMeasurements width={width} height={height} depth={depth} shelves={shelves} thickness={thickness} showHeightMeasurement={showHeightMeasurement} />
     </group>
   )

@@ -1,18 +1,26 @@
 import { useState } from 'react'
 import { useDrag } from '../DragContext'
 
+const SNAP_FRACTIONS = [0.25, 0.33, 0.50, 0.66, 0.75]
+
 type CabinetHandlesProps = {
   id: string
   width: number
   height: number
   depth: number
+  thickness: number
   shelves: number[]
 }
 
-export default function CabinetHandles({ id, width, height, depth, shelves }: CabinetHandlesProps) {
+export default function CabinetHandles({ id, width, height, depth, thickness, shelves }: CabinetHandlesProps) {
   const { setDrag } = useDrag()
   const [widthHover, setWidthHover] = useState(false)
   const [shelfHover, setShelfHover] = useState<number | null>(null)
+
+  const floor = thickness
+  const ceiling = height - thickness
+  const interior = ceiling - floor
+  const snapPoints = SNAP_FRACTIONS.map(f => floor + interior * f)
 
   return (
     <group>
@@ -46,6 +54,14 @@ export default function CabinetHandles({ id, width, height, depth, shelves }: Ca
         >
           <boxGeometry args={[width * 0.6, 0.015, 0.015]} />
           <meshStandardMaterial color={shelfHover === i ? '#55d6a8' : '#00B894'} />
+        </mesh>
+      ))}
+
+      {/* Snap point indicators — visible when any shelf handle is hovered */}
+      {shelfHover !== null && snapPoints.map((snapY, i) => (
+        <mesh key={i} position={[0, snapY, depth / 2]}>
+          <boxGeometry args={[width * 0.6, 0.008, 0.008]} />
+          <meshStandardMaterial color="#FFD700" transparent opacity={0.7} />
         </mesh>
       ))}
     </group>

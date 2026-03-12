@@ -67,6 +67,8 @@ export const useCabinetStore = create<CabinetState>((set, get) => ({
 
   setShelf: (id, shelfIndex, y) => {
     const { height, thickness } = get()
+    const SNAP_FRACTIONS = [0.25, 0.33, 0.50, 0.66, 0.75]
+    const SNAP_THRESHOLD = 0.04  // meters (~4cm)
     set((state) => ({
       cabinets: state.cabinets.map((c) => {
         if (c.id !== id) return c
@@ -75,7 +77,18 @@ export const useCabinetStore = create<CabinetState>((set, get) => ({
         const ceiling = height - thickness
         const lowerBound = shelfIndex > 0 ? shelves[shelfIndex - 1] + thickness : floor
         const upperBound = shelfIndex < shelves.length - 1 ? shelves[shelfIndex + 1] - thickness : ceiling
-        shelves[shelfIndex] = Math.max(lowerBound, Math.min(upperBound, y))
+
+        const interior = ceiling - floor
+        const snapPoints = SNAP_FRACTIONS.map(f => floor + interior * f)
+        let snapped = y
+        for (const sp of snapPoints) {
+          if (Math.abs(y - sp) < SNAP_THRESHOLD) {
+            snapped = sp
+            break
+          }
+        }
+
+        shelves[shelfIndex] = Math.max(lowerBound, Math.min(upperBound, snapped))
         return { ...c, shelves }
       }),
     }))
