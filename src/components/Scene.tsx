@@ -1,5 +1,5 @@
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Environment } from '@react-three/drei'
+import { OrbitControls, Environment, Text } from '@react-three/drei'
 import Cabinet from './Cabinet'
 import * as THREE from 'three'
 import { useCabinetStore } from '../store'
@@ -13,10 +13,10 @@ function Room() {
   return (
     <group>
       {/* Floor — dark oak */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, 0]} receiveShadow>
+      {/* <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.12, 0]} receiveShadow>
         <planeGeometry args={[10, 10]} />
         <meshStandardMaterial color="#6b4226" roughness={0.85} metalness={0.0} />
-      </mesh>
+      </mesh> */}
 
       {/* Back wall — sage green */}
       <mesh position={[0, 2.5, -3]} receiveShadow>
@@ -89,6 +89,15 @@ function SceneContent() {
       {/* Soft fill from right */}
       <pointLight position={[4, 3, 2]} intensity={0.6} color="#d0e8ff" />
 
+      {/* Assist grid — sits just above floor to avoid z-fighting */}
+      <gridHelper args={[10, 20, '#6b4226', '#4a2e1a']} position={[0, -0.119, 0]} />
+
+      {/* Axis indicator — small XYZ arrows at scene origin */}
+      <axesHelper args={[0.4]} position={[0, -0.119, 0]} />
+      <Text position={[0.52, -0.119, 0]} fontSize={0.08} color="#ff4444" anchorX="center" anchorY="middle">X</Text>
+      <Text position={[0, 0.28, 0]} fontSize={0.08} color="#44ff44" anchorX="center" anchorY="middle">Y</Text>
+      <Text position={[0, -0.119, 0.52]} fontSize={0.08} color="#4488ff" anchorX="center" anchorY="middle">Z</Text>
+
       <Room />
       {cabinets.map((spec, index) => (
         <Cabinet
@@ -99,6 +108,7 @@ function SceneContent() {
           width={spec.width}
           depth={depth}
           shelves={spec.shelves}
+          thickness={thickness}
           showHeightMeasurement={index === 0} // only show height for first cabinet to avoid clutter
         />
       ))}

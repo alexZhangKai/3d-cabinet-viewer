@@ -5,12 +5,13 @@ type Props = {
   height: number
   depth: number
   shelves: number[]
+  thickness: number
   showHeightMeasurement?: boolean
 }
 
-const cm = (m: number) => `${Math.round(m * 100)} cm`
+const cm = (m: number) => `${(m * 100).toFixed(2)} cm`
 
-export default function CabinetMeasurements({ width, height, depth, shelves, showHeightMeasurement = true }: Props) {
+export default function CabinetMeasurements({ width, height, depth, shelves, thickness, showHeightMeasurement = true }: Props) {
   const z = depth / 2 + 0.01 // slightly in front of cabinet face
 
   // Width dimension line sits 13 cm below cabinet floor
@@ -20,14 +21,23 @@ export default function CabinetMeasurements({ width, height, depth, shelves, sho
   // Height dimension line sits to the left of the cabinet
   const heightLineX = width / 2 + 0.05
 
-  // Compute compartment intervals from shelf positions.
-  const compartments: { y1: number; y2: number }[] = shelves.map((shelfY, i) => {
-    const y1 = i === 0 ? 0 : shelves[i - 1]
-    const y2 = shelfY
-    return { y1, y2 }
+  // Inner dimensions (subtract wall/panel thickness)
+  const innerWidth = width - 2 * thickness
+  const innerHeight = height - 2 * thickness
+
+  // Compute inner compartment intervals accounting for shelf panel thickness.
+  const compartments: { y1: number; y2: number; innerH: number }[] = shelves.map((shelfY, i) => {
+    const y1 = i === 0 ? thickness : shelves[i - 1] + thickness / 2
+    const y2 = shelfY - thickness / 2
+    return { y1, y2, innerH: y2 - y1 }
   })
-  if (shelves.length > 0) compartments.push({ y1: shelves[shelves.length - 1], y2: height })
-  else compartments.push({ y1: 0, y2: height })
+  if (shelves.length > 0) {
+    const y1 = shelves[shelves.length - 1] + thickness / 2
+    const y2 = height - thickness
+    compartments.push({ y1, y2, innerH: y2 - y1 })
+  } else {
+    compartments.push({ y1: thickness, y2: height - thickness, innerH: innerHeight })
+  }
 
   return (
     <group>
@@ -58,11 +68,11 @@ export default function CabinetMeasurements({ width, height, depth, shelves, sho
         outlineWidth={0.005}
         outlineColor="#fff"
       >
-        {cm(width)}
+        {cm(innerWidth)}
       </Text>
 
       {/* ── Shelf compartments (right side) ── */}
-      {compartments.map(({ y1, y2 }, i) => {
+      {compartments.map(({ y1, y2, innerH }, i) => {
         const x = 0
         const mid = (y1 + y2) / 2
         return (
@@ -79,7 +89,7 @@ export default function CabinetMeasurements({ width, height, depth, shelves, sho
               outlineWidth={0.004}
               outlineColor="#fff"
             >
-              {cm(y2 - y1)}
+              {cm(innerH)}
             </Text>
           </group>
         )
@@ -112,7 +122,7 @@ export default function CabinetMeasurements({ width, height, depth, shelves, sho
             outlineWidth={0.005}
             outlineColor="#fff"
           >
-            {cm(height)}
+            {cm(innerHeight)}
           </Text>
         </>
       )}
