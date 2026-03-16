@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useDrag } from '../DragContext'
-
-const SNAP_FRACTIONS = [0.25, 0.33, 0.50, 0.66, 0.75]
+import { getSnapPoints } from '../cabinetUtils'
 
 type CabinetHandlesProps = {
   id: string
@@ -16,17 +15,13 @@ export default function CabinetHandles({ id, width, height, depth, thickness, sh
   const { setDrag } = useDrag()
   const [widthHover, setWidthHover] = useState(false)
   const [shelfHover, setShelfHover] = useState<number | null>(null)
-
-  const floor = thickness
-  const ceiling = height - thickness
-  const interior = ceiling - floor
-  const snapPoints = SNAP_FRACTIONS.map(f => floor + interior * f)
+  const snapPoints = getSnapPoints(height, thickness)
 
   return (
     <group>
       {/* Width handle — right edge, front face */}
       <mesh
-        position={[width / 2, height / 2, depth / 2]}
+        position={[width / 2 + thickness / 2, height / 2, depth / 2]}
         onPointerOver={(e) => { e.stopPropagation(); setWidthHover(true); document.body.style.cursor = 'ew-resize' }}
         onPointerOut={() => { setWidthHover(false); document.body.style.cursor = 'default' }}
         onPointerDown={(e) => {

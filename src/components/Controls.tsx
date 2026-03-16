@@ -45,7 +45,7 @@ function CabinetRow({ cabinet, index, totalCabinets, onOpenPicker }: CabinetRowP
       </div>
 
       {[{ shelfY: thickness / 2, shelfIndex: -1 }, ...shelves.map((shelfY, shelfIndex) => ({ shelfY, shelfIndex }))].map(({ shelfY, shelfIndex }) => {
-        const nextShelfY = (shelfIndex === -1 ? shelves[0] : shelves[shelfIndex + 1]) ?? height
+        const nextShelfY = (shelfIndex === -1 ? shelves[0] : shelves[shelfIndex + 1]) ?? height - thickness
         const clearance = nextShelfY - (shelfY + thickness)
         const shelfModels = placedModels
           .filter((m) => m.cabinetId === id && m.shelfIndex === shelfIndex)
