@@ -5,47 +5,57 @@ type Props = {
   height: number
   depth: number
   shelves: number[]
+  thickness: number
   showHeightMeasurement?: boolean
 }
 
-const cm = (m: number) => `${Math.round(m * 100)} cm`
+const cm = (m: number) => `${(m * 100).toFixed(2)} cm`
 
-export default function CabinetMeasurements({ width, height, depth, shelves, showHeightMeasurement = true }: Props) {
+export default function CabinetMeasurements({ width, height, depth, shelves, thickness, showHeightMeasurement = true }: Props) {
   const z = depth / 2 + 0.01 // slightly in front of cabinet face
 
   // Width dimension line sits 13 cm below cabinet floor
-  const widthLineY = height + 0.05
+  const widthLineY = height + 0.02
   const tickH = 0.03
 
   // Height dimension line sits to the left of the cabinet
   const heightLineX = width / 2 + 0.05
 
-  // Compute compartment intervals from shelf positions.
-  const compartments: { y1: number; y2: number }[] = shelves.map((shelfY, i) => {
-    const y1 = i === 0 ? 0 : shelves[i - 1]
+  // dimensions (subtract wall/panel thickness)
+  const innerWidth = width
+  const outerHeight = height
+
+  // Compute inner compartment intervals accounting for shelf panel thickness.
+  const compartments: { y1: number; y2: number; innerH: number }[] = shelves.map((shelfY, i) => {
+    const y1 = i === 0 ? thickness / 2 : shelves[i - 1]
     const y2 = shelfY
-    return { y1, y2 }
+    return { y1, y2, innerH: y2 - y1 - thickness }
   })
-  if (shelves.length > 0) compartments.push({ y1: shelves[shelves.length - 1], y2: height })
-  else compartments.push({ y1: 0, y2: height })
+  if (shelves.length > 0) {
+    const y1 = shelves[shelves.length - 1]
+    const y2 = height - thickness / 2
+    compartments.push({ y1, y2, innerH: y2 - y1 - thickness })
+  } else {
+    compartments.push({ y1: thickness / 2, y2: height - thickness / 2, innerH: height - thickness * 2 })
+  }
 
   return (
     <group>
-      {/* ── Width ── */}
+      {/* ── Inner Width ── */}
       <Line
-        points={[[-width / 2, widthLineY, z], [width / 2, widthLineY, z]]}
+        points={[[-innerWidth / 2, widthLineY, z], [innerWidth / 2, widthLineY, z]]}
         color="#444"
         lineWidth={1.5}
       />
       {/* Left tick */}
       <Line
-        points={[[-width / 2, widthLineY - tickH, z], [-width / 2, widthLineY + tickH, z]]}
+        points={[[-innerWidth / 2, widthLineY - tickH, z], [-innerWidth / 2, widthLineY + tickH, z]]}
         color="#444"
         lineWidth={1.5}
       />
       {/* Right tick */}
       <Line
-        points={[[width / 2, widthLineY - tickH, z], [width / 2, widthLineY + tickH, z]]}
+        points={[[innerWidth / 2, widthLineY - tickH, z], [innerWidth / 2, widthLineY + tickH, z]]}
         color="#444"
         lineWidth={1.5}
       />
@@ -58,18 +68,20 @@ export default function CabinetMeasurements({ width, height, depth, shelves, sho
         outlineWidth={0.005}
         outlineColor="#fff"
       >
-        {cm(width)}
+        {cm(innerWidth)}
       </Text>
 
       {/* ── Shelf compartments (right side) ── */}
-      {compartments.map(({ y1, y2 }, i) => {
+      {compartments.map(({ y1, y2, innerH }, i) => {
         const x = 0
         const mid = (y1 + y2) / 2
+        const y1Mark = y1 + thickness / 2
+        const y2Mark = y2 - thickness / 2
         return (
           <group key={i}>
-            <Line points={[[x - tickH, y1, z], [x + tickH, y1, z]]} color="#888" lineWidth={1} />
-            <Line points={[[x - tickH, y2, z], [x + tickH, y2, z]]} color="#888" lineWidth={1} />
-            <Line points={[[x, y1, z], [x, y2, z]]} color="#888" lineWidth={1} />
+            <Line points={[[x - tickH, y1Mark, z], [x + tickH, y1Mark, z]]} color="#888" lineWidth={1} />
+            <Line points={[[x - tickH, y2Mark, z], [x + tickH, y2Mark, z]]} color="#888" lineWidth={1} />
+            <Line points={[[x, y1Mark, z], [x, y2Mark, z]]} color="#888" lineWidth={1} />
             <Text
               position={[x + 0.1, mid, z]}
               fontSize={0.055}
@@ -79,7 +91,7 @@ export default function CabinetMeasurements({ width, height, depth, shelves, sho
               outlineWidth={0.004}
               outlineColor="#fff"
             >
-              {cm(y2 - y1)}
+              {cm(innerH)}
             </Text>
           </group>
         )
@@ -112,7 +124,7 @@ export default function CabinetMeasurements({ width, height, depth, shelves, sho
             outlineWidth={0.005}
             outlineColor="#fff"
           >
-            {cm(height)}
+            {cm(outerHeight)}
           </Text>
         </>
       )}

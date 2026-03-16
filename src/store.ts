@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { getSnapPoints, applySnap } from './cabinetUtils'
 
 export type CabinetSpec = {
   id: string
@@ -33,23 +34,24 @@ interface CabinetState {
 }
 
 export const useCabinetStore = create<CabinetState>((set, get) => ({
-  height: 2.0,
-  depth: 0.5,
-  thickness: 0.03,
+  height: 1.8, // external dimensions in meters, controls max shelf height and overall cabinet height
+  width: 2.8, // external dimensions in meters, control max overall cabinet width
+  depth: 0.7, // no internal/external distinction for depth, just total
+  thickness: 0.017, // material thickness in meters, depends on the material used
   cabinets: [
     {
       id: 'cabinet-1',
-      width: 1.0,
-      shelves: [0.5, 1, 1.5],
+      width: 0.7, // internal width
+      shelves: [0.9], // shelf heights in meters between center of the shelf panel and the floor (base panel) TODO: add restriction
     },
     {
       id: 'cabinet-2',
-      width: 2.0,
+      width: 1.0,
       shelves: [2 / 3, 4 / 3],
     },
     {
       id: 'cabinet-3',
-      width: 1.0,
+      width: 0.7,
       shelves: [0.4, 0.8, 1.2, 1.6],
     },
   ],
@@ -71,11 +73,13 @@ export const useCabinetStore = create<CabinetState>((set, get) => ({
       cabinets: state.cabinets.map((c) => {
         if (c.id !== id) return c
         const shelves = [...c.shelves]
-        const floor = thickness
-        const ceiling = height - thickness
+        const floor = thickness * 1.5
+        const ceiling = height - thickness * 1.5
         const lowerBound = shelfIndex > 0 ? shelves[shelfIndex - 1] + thickness : floor
         const upperBound = shelfIndex < shelves.length - 1 ? shelves[shelfIndex + 1] - thickness : ceiling
-        shelves[shelfIndex] = Math.max(lowerBound, Math.min(upperBound, y))
+
+        const snapped = applySnap(y, getSnapPoints(height, thickness))
+        shelves[shelfIndex] = Math.max(lowerBound, Math.min(upperBound, snapped))
         return { ...c, shelves }
       }),
     }))

@@ -29,12 +29,6 @@ export default function App() {
     <div className="w-screen h-screen relative">
       <Scene />
       <Controls />
-
-      {/* TODO(human): render a floating ghost label that follows the cursor while dragging.
-          Use `mouse.x` and `mouse.y` for position, `draggingModel` for the model data,
-          and `modelColor(draggingModel.id)` for the color swatch.
-          Show at minimum: a color swatch + model name. Keep it small (fontSize ~12px).
-          Hint: position: 'fixed', pointerEvents: 'none', zIndex: 999, left: mouse.x + 14, top: mouse.y + 14 */}
       {draggingModel && (
         <div style={{
           position: 'fixed',

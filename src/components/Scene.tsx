@@ -1,13 +1,32 @@
 import { Canvas } from '@react-three/fiber'
-import { OrbitControls, Environment } from '@react-three/drei'
+import { OrbitControls, Environment, Text, Line } from '@react-three/drei'
 import Cabinet from './Cabinet'
 import * as THREE from 'three'
 import { useCabinetStore } from '../store'
 import { useDrag } from '../DragContext'
 import { DragProvider } from '../DragProvider'
-import { useRef, useEffect } from 'react'
-import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib'
 import type { ThreeEvent } from '@react-three/fiber'
+
+const cm = (m: number) => `${(m * 100).toFixed(2)} cm`
+
+type TotalWidthProps = { totalWidth: number; height: number; depth: number; thickness: number }
+
+function TotalWidthMeasurement({ totalWidth, height, depth, thickness }: TotalWidthProps) {
+  const z = depth / 2 + 0.01
+  const y = height + 0.15
+  const tickH = 0.03
+  const halfW = totalWidth / 2
+  return (
+    <group>
+      <Line points={[[-halfW - thickness, y, z], [halfW - thickness, y, z]]} color="#444" lineWidth={1.5} />
+      <Line points={[[-halfW - thickness, y - tickH - 0.12, z], [-halfW - thickness, y + tickH, z]]} color="#444" lineWidth={1.5} />
+      <Line points={[[halfW - thickness, y - tickH - 0.12, z], [halfW - thickness, y + tickH, z]]} color="#444" lineWidth={1.5} />
+      <Text position={[0, y + 0.07, z]} fontSize={0.07} color="#222" anchorX="center" anchorY="middle" outlineWidth={0.005} outlineColor="#fff">
+        {cm(totalWidth)}
+      </Text>
+    </group>
+  )
+}
 
 function Room() {
   return (
@@ -42,16 +61,13 @@ function Room() {
 function SceneContent() {
   const { cabinets, height, depth, thickness, setWidth, setShelf, draggingModelId } = useCabinetStore()
   const { drag, setDrag } = useDrag()
-  const orbitRef = useRef<OrbitControlsImpl>(null)
 
-  useEffect(() => {
-    if (orbitRef.current) orbitRef.current.enabled = !drag && !draggingModelId
-  }, [drag, draggingModelId])
+  let totalWidth = cabinets.reduce((sum, c) => sum + c.width, 0)
+  totalWidth += thickness * (cabinets.length + 1) // add gaps between cabinets
 
-  const totalWidth = cabinets.reduce((sum, c) => sum + c.width, 0)
   const startX = -totalWidth / 2
   const positions = cabinets.map((c, i) => {
-    const x = startX + c.width / 2 + cabinets.slice(0, i).reduce((sum, s) => sum + s.width - thickness, 0)
+    const x = startX + c.width / 2 + cabinets.slice(0, i).reduce((sum, s) => sum + s.width + thickness, 0)
     return [x, 0, 0] as [number, number, number]
   })
 
@@ -89,6 +105,15 @@ function SceneContent() {
       {/* Soft fill from right */}
       <pointLight position={[4, 3, 2]} intensity={0.6} color="#d0e8ff" />
 
+      {/* Assist grid — sits just above floor to avoid z-fighting */}
+      <gridHelper args={[10, 20, '#6b4226', '#4a2e1a']} position={[0, -0.119, 0]} />
+
+      {/* Axis indicator — small XYZ arrows at scene origin */}
+      <axesHelper args={[0.4]} position={[0, -0.119, 0]} />
+      <Text position={[0.52, -0.119, 0]} fontSize={0.08} color="#ff4444" anchorX="center" anchorY="middle">X</Text>
+      <Text position={[0, 0.28, 0]} fontSize={0.08} color="#44ff44" anchorX="center" anchorY="middle">Y</Text>
+      <Text position={[0, -0.119, 0.52]} fontSize={0.08} color="#4488ff" anchorX="center" anchorY="middle">Z</Text>
+
       <Room />
       {cabinets.map((spec, index) => (
         <Cabinet
@@ -99,9 +124,12 @@ function SceneContent() {
           width={spec.width}
           depth={depth}
           shelves={spec.shelves}
+          thickness={thickness}
           showHeightMeasurement={index === 0} // only show height for first cabinet to avoid clutter
         />
       ))}
+
+      <TotalWidthMeasurement totalWidth={totalWidth} height={height} depth={depth} thickness={thickness} />
 
       {drag && (
         <mesh
@@ -116,10 +144,8 @@ function SceneContent() {
 
       <Environment preset="apartment" />
       <OrbitControls
-        ref={orbitRef}
-        minPolarAngle={0.2}
-        maxPolarAngle={Math.PI / 2 + 0.1}
-        enablePan={false}
+        makeDefault
+        enabled={!drag && !draggingModelId}
         target={[0, 0.8, 0]}
       />
     </>
