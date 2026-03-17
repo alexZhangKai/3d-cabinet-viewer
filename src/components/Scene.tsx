@@ -72,14 +72,16 @@ function SceneContent() {
     return [x, 0, 0] as [number, number, number]
   })
 
+  const snap5mm = (m: number) => Math.round(m / 0.005) * 0.005
+
   const handleDragMove = (e: ThreeEvent<PointerEvent>) => {
     if (!drag) return
     if (drag.type === 'width') {
       const deltaX = e.point.x - drag.startPoint.x
-      setWidth(drag.cabinetId, drag.startValue + deltaX)
+      setWidth(drag.cabinetId, snap5mm(drag.startValue + deltaX))
     } else {
       const deltaY = e.point.y - drag.startPoint.y
-      setShelf(drag.cabinetId, drag.shelfIndex!, drag.startValue + deltaY)
+      setShelf(drag.cabinetId, drag.shelfIndex!, snap5mm(drag.startValue + deltaY))
     }
   }
 
@@ -120,6 +122,7 @@ function SceneContent() {
         <Cabinet
           key={spec.id}
           id={spec.id}
+          index={index}
           position={positions[index]}
           height={height}
           width={spec.width}

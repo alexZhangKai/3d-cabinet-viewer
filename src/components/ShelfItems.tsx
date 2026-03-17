@@ -31,12 +31,14 @@ function ShelfItem({ model, centerX, centerY, centerZ, renderDepth, hasFitIssue,
       </mesh>
       {model.widthM > 0.08 && (
         <Text
-          position={[centerX, centerY, centerZ + renderDepth / 2 + 0.001]}
+          position={[centerX, centerY - model.heightM / 2 + 0.005, centerZ + renderDepth / 2 + 0.001]}
           fontSize={0.025}
-          color="#fff"
+          color="#7dd3fc"
           anchorX="center"
-          anchorY="middle"
+          anchorY="bottom"
           maxWidth={model.widthM - 0.01}
+          outlineWidth={0.003}
+          outlineColor="#000"
         >
           {model.name}
         </Text>

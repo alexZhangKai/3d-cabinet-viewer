@@ -65,6 +65,7 @@ function DimensionsSection() {
               type="range"
               min={min}
               max={max}
+              step={5}
               value={mm}
               onChange={(e) => set(Number(e.target.value))}
               style={{ flex: 1, accentColor: '#4af' }}
@@ -73,6 +74,7 @@ function DimensionsSection() {
               type="number"
               min={min}
               max={max}
+              step={5}
               value={mm}
               onChange={(e) => set(Number(e.target.value))}
               style={{
@@ -143,7 +145,7 @@ function CabinetsSection() {
 }
 
 function ShelvesSection() {
-  const { cabinets, addShelf, removeShelf, height, thickness } = useCabinetStore()
+  const { cabinets, addShelf, removeShelf, setShelf, height, thickness } = useCabinetStore()
 
   return (
     <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -152,41 +154,64 @@ function ShelvesSection() {
         const maxGap = Math.max(...boundaries.slice(0, -1).map((b, idx) => boundaries[idx + 1] - b))
         const canAddShelf = maxGap > thickness * 2
 
-        const chips = ['Shelf 1', ...cabinet.shelves.map((_, si) => `Shelf${si + 2}`)]
-
         return (
           <div key={cabinet.id}>
             <div style={{ fontSize: T.fsSub, color: T.textMuted, marginBottom: 6 }}>Cabinet {i + 1}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' }}>
-              {chips.map((label) => (
-                <div
-                  key={label}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {[thickness / 2, ...cabinet.shelves].map((y1, ci) => {
+                const y2 = ci < cabinet.shelves.length ? cabinet.shelves[ci] : height - thickness / 2
+                const innerH = y2 - y1 - thickness
+                const isEditable = ci < cabinet.shelves.length
+                const upperBound = ci < cabinet.shelves.length - 1 ? cabinet.shelves[ci + 1] - thickness : height - thickness * 1.5
+                const maxInnerH = upperBound - y1 - thickness
+                return (
+                  <div key={ci} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: T.fsSub, color: '#bbb', width: 52, flexShrink: 0 }}>Shelf {ci + 1}</span>
+                    {isEditable ? (
+                      <>
+                        <input
+                          type="number"
+                          step={5}
+                          min={Math.round(thickness * 2 * 1000)}
+                          max={Math.round(maxInnerH * 1000)}
+                          value={Math.round(innerH * 1000)}
+                          onChange={(e) => setShelf(cabinet.id, ci, Number(e.target.value) / 1000 + y1 + thickness)}
+                          style={{
+                            flex: 1, background: 'rgba(255,255,255,0.07)',
+                            border: '1px solid rgba(255,255,255,0.12)', borderRadius: 4,
+                            padding: '4px 8px', color: '#eee', fontSize: T.fs, outline: 'none',
+                          }}
+                        />
+                        <span style={{ fontSize: T.fsSub, color: T.textMuted, width: 24 }}>mm</span>
+                      </>
+                    ) : (
+                      <span style={{ fontSize: T.fsSub, color: T.textMuted }}>{Math.round(innerH * 1000)} mm</span>
+                    )}
+                  </div>
+                )
+              })}
+              <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
+                <button
+                  onClick={() => addShelf(cabinet.id)}
+                  disabled={!canAddShelf}
                   style={{
-                    background: 'rgba(255,255,255,0.07)', borderRadius: 4,
-                    padding: '3px 9px', fontSize: T.fsSub, color: '#bbb',
+                    flex: 1, background: 'none', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 4,
+                    padding: '5px 0', fontSize: T.fsSub,
+                    color: canAddShelf ? '#8cf' : 'rgba(255,255,255,0.2)',
+                    cursor: canAddShelf ? 'pointer' : 'not-allowed',
                   }}
-                >{label}</div>
-              ))}
-              <button
-                onClick={() => addShelf(cabinet.id)}
-                disabled={!canAddShelf}
-                style={{
-                  background: 'none', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 4,
-                  padding: '3px 9px', fontSize: T.fsSub,
-                  color: canAddShelf ? '#8cf' : 'rgba(255,255,255,0.2)',
-                  cursor: canAddShelf ? 'pointer' : 'not-allowed',
-                }}
-              >+ Shelf</button>
-              <button
-                onClick={() => removeShelf(cabinet.id, cabinet.shelves.length - 1)}
-                disabled={cabinet.shelves.length === 0}
-                style={{
-                  background: 'none', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 4,
-                  padding: '3px 9px', fontSize: T.fsSub,
-                  color: cabinet.shelves.length === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.5)',
-                  cursor: cabinet.shelves.length === 0 ? 'not-allowed' : 'pointer',
-                }}
-              >- Shelf</button>
+                >+ Shelf</button>
+                <button
+                  onClick={() => removeShelf(cabinet.id, cabinet.shelves.length - 1)}
+                  disabled={cabinet.shelves.length === 0}
+                  style={{
+                    flex: 1, background: 'none', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 4,
+                    padding: '5px 0', fontSize: T.fsSub,
+                    color: cabinet.shelves.length === 0 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.5)',
+                    cursor: cabinet.shelves.length === 0 ? 'not-allowed' : 'pointer',
+                  }}
+                >- Shelf</button>
+              </div>
             </div>
           </div>
         )

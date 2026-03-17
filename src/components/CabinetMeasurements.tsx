@@ -1,6 +1,7 @@
 import { Text, Line } from '@react-three/drei'
 
 type Props = {
+  index: number,
   width: number
   height: number
   depth: number
@@ -11,8 +12,8 @@ type Props = {
 
 const cm = (m: number) => `${(m * 100).toFixed(2)} cm`
 
-export default function CabinetMeasurements({ width, height, depth, shelves, thickness, showHeightMeasurement = true }: Props) {
-  const z = depth / 2 + 0.01 // slightly in front of cabinet face
+export default function CabinetMeasurements({ index, width, height, depth, shelves, thickness, showHeightMeasurement = true }: Props) {
+  const z = depth / 2 + 0.02 // slightly in front of cabinet face
 
   // Width dimension line sits 13 cm below cabinet floor
   const widthLineY = height + 0.02
@@ -60,6 +61,17 @@ export default function CabinetMeasurements({ width, height, depth, shelves, thi
         lineWidth={1.5}
       />
       <Text
+        position={[0, widthLineY - 0.03, z]}
+        fontSize={0.045}
+        color="#222"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.005}
+        outlineColor="#fff"
+      >
+        {`Cabinet ${index + 1}`}
+      </Text>
+      <Text
         position={[0, widthLineY + 0.07, z]}
         fontSize={0.07}
         color="#222"
@@ -83,8 +95,19 @@ export default function CabinetMeasurements({ width, height, depth, shelves, thi
             <Line points={[[x - tickH, y2Mark, z], [x + tickH, y2Mark, z]]} color="#888" lineWidth={1} />
             <Line points={[[x, y1Mark, z], [x, y2Mark, z]]} color="#888" lineWidth={1} />
             <Text
+              position={[x - 0.1, mid, z]}
+              fontSize={0.045}
+              color="#555"
+              anchorX="center"
+              anchorY="middle"
+              outlineWidth={0.004}
+              outlineColor="#fff"
+            >
+              {`Shelf ${i + 1}`}
+            </Text>
+            <Text
               position={[x + 0.1, mid, z]}
-              fontSize={0.055}
+              fontSize={0.045}
               color="#555"
               anchorX="center"
               anchorY="middle"

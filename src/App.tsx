@@ -15,7 +15,7 @@ export default function App() {
       .then((r) => r.json())
       .then(loadConfig)
       .catch(() => { })
-  })
+  }, [])
 
   useEffect(() => {
     if (!draggingModelId) return

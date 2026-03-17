@@ -5,7 +5,8 @@ import ShelfItems from './ShelfItems'
 import ShelfDropZones from './ShelfDropZones'
 
 type CabinetProps = {
-  id: string
+  id: string,
+  index: number,
   position?: [number, number, number] | Vector3
   height: number,
   width: number,
@@ -15,7 +16,7 @@ type CabinetProps = {
   showHeightMeasurement?: boolean
 }
 
-export default function Cabinet({ id, position, height, width, depth, shelves, thickness, showHeightMeasurement = true }: CabinetProps) {
+export default function Cabinet({ id, index, position, height, width, depth, shelves, thickness, showHeightMeasurement = true }: CabinetProps) {
   const wood = <meshStandardMaterial color="#c8a96e" roughness={0.6} metalness={0.05} />
   const darkWood = <meshStandardMaterial color="#8b5e3c" roughness={0.7} metalness={0.0} />
 
@@ -72,7 +73,7 @@ export default function Cabinet({ id, position, height, width, depth, shelves, t
       <ShelfItems cabinetId={id} width={width} depth={depth} thickness={thickness} shelves={shelves} />
       <ShelfDropZones cabinetId={id} width={width} depth={depth} thickness={thickness} shelves={shelves} />
       <CabinetHandles id={id} width={width} height={height} depth={depth} thickness={thickness} shelves={shelves} />
-      <CabinetMeasurements width={width} height={height} depth={depth} shelves={shelves} thickness={thickness} showHeightMeasurement={showHeightMeasurement} />
+      <CabinetMeasurements index={index} width={width} height={height} depth={depth} shelves={shelves} thickness={thickness} showHeightMeasurement={showHeightMeasurement} />
     </group>
   )
 }

@@ -207,12 +207,16 @@ export const useCabinetStore = create<CabinetState>((set, get) => ({
   },
 
   newDesign: () => {
-    const { height, thickness } = get()
+    const defaultHeight = 1.8
+    const defaultThickness = 0.017
     set({
+      height: defaultHeight,
+      depth: 0.7,
+      thickness: defaultThickness,
       cabinets: [{
         id: crypto.randomUUID(),
         width: 0.8,
-        shelves: [(height - thickness * 2) / 2 + thickness],
+        shelves: [(defaultHeight - defaultThickness * 2) / 2 + defaultThickness],
       }],
       placedModels: [],
     })
