@@ -76,7 +76,12 @@ export default function ShelfItems({ cabinetId, width, depth, thickness: T, shel
           .map((m) => ({ placed: m, model: DISPLAY_MODELS.find((d) => d.id === m.modelId)! }))
           .filter((x) => x.model)
 
-        let cursor = 0
+        const totalItemsWidth = shelfModels.reduce(
+          (sum, { model }, i) => sum + model.widthM + (i < shelfModels.length - 1 ? GAP : 0),
+          0
+        )
+        const innerWidth = innerRight - innerLeft
+        let cursor = (innerWidth - totalItemsWidth) / 2
 
         return shelfModels.map(({ placed, model }) => {
           const renderDepth = Math.min(model.depthM!, usableDepth)

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { z } from 'zod'
 import { useCabinetStore } from '../store'
-import type { CabinetSpec } from '../store'
+import type { CabinetSpec, CabinetConfig } from '../store'
 import { DISPLAY_MODELS, modelColor } from '../data/displayModels'
 import ModelPicker from './ModelPicker'
 
@@ -151,7 +152,7 @@ function ShelvesSection() {
         const maxGap = Math.max(...boundaries.slice(0, -1).map((b, idx) => boundaries[idx + 1] - b))
         const canAddShelf = maxGap > thickness * 2
 
-        const chips = ['Shelf 1', ...cabinet.shelves.map((_, si) => `Shelf${si + 1}`)]
+        const chips = ['Shelf 1', ...cabinet.shelves.map((_, si) => `Shelf${si + 2}`)]
 
         return (
           <div key={cabinet.id}>
@@ -255,7 +256,8 @@ function ModelCatalog() {
 }
 
 function ShelfItemsSection({ onOpenPicker }: ShelfItemsSectionProps) {
-  const { cabinets, height, thickness, depth, placedModels, removePlacedModel } = useCabinetStore()
+  const { cabinets, height, thickness, depth, placedModels, removePlacedModel, movePlacedModelBefore } = useCabinetStore()
+  const [dragOverId, setDragOverId] = useState<string | null>(null)
 
   return (
     <div>
@@ -265,7 +267,7 @@ function ShelfItemsSection({ onOpenPicker }: ShelfItemsSectionProps) {
           const usableWidth = cabinet.width - thickness * 2
           const compartments = [
             { shelfY: thickness / 2, shelfIndex: -1, label: 'Shelf 1' },
-            ...cabinet.shelves.map((shelfY, si) => ({ shelfY, shelfIndex: si, label: `Shelf ${si + 1}` })),
+            ...cabinet.shelves.map((shelfY, si) => ({ shelfY, shelfIndex: si, label: `Shelf ${si + 2}` })),
           ]
 
           return (
@@ -294,17 +296,29 @@ function ShelfItemsSection({ onOpenPicker }: ShelfItemsSectionProps) {
                       {shelfModels.map(({ placed, model }) => (
                         <div
                           key={placed.instanceId}
+                          draggable
+                          onDragStart={(e) => e.dataTransfer.setData('text/plain', placed.instanceId)}
+                          onDragOver={(e) => { e.preventDefault(); setDragOverId(placed.instanceId) }}
+                          onDragLeave={() => setDragOverId(null)}
+                          onDrop={(e) => {
+                            e.preventDefault()
+                            movePlacedModelBefore(e.dataTransfer.getData('text/plain'), placed.instanceId)
+                            setDragOverId(null)
+                          }}
                           style={{
                             display: 'flex', alignItems: 'center', gap: 3,
-                            background: 'rgba(255,255,255,0.08)', borderRadius: 3,
+                            background: dragOverId === placed.instanceId ? 'rgba(100,180,255,0.15)' : 'rgba(255,255,255,0.08)',
+                            borderRadius: 3,
+                            border: dragOverId === placed.instanceId ? '1px solid rgba(100,180,255,0.4)' : '1px solid transparent',
                             padding: '3px 7px', fontSize: T.fsSub, color: '#ccc',
+                            cursor: 'grab',
                           }}
                         >
                           <div style={{ width: 8, height: 8, borderRadius: 2, background: modelColor(model.id), flexShrink: 0 }} />
                           <span>{model.name}</span>
                           <button
                             onClick={() => removePlacedModel(placed.instanceId)}
-                            style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', padding: 0, fontSize: T.fs }}
+                            style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: 0, fontSize: T.fs }}
                           >×</button>
                         </div>
                       ))}
@@ -330,10 +344,90 @@ function ShelfItemsSection({ onOpenPicker }: ShelfItemsSectionProps) {
   )
 }
 
+const CabinetConfigSchema = z.object({
+  version: z.literal(1),
+  height: z.number(),
+  depth: z.number(),
+  thickness: z.number(),
+  cabinets: z.array(z.object({
+    id: z.string(),
+    width: z.number(),
+    shelves: z.array(z.number()),
+  })),
+  placedModels: z.array(z.object({
+    instanceId: z.string(),
+    cabinetId: z.string(),
+    shelfIndex: z.number(),
+    modelId: z.string(),
+  })),
+})
+
+function validateConfig(data: unknown): CabinetConfig | null {
+  const result = CabinetConfigSchema.safeParse(data)
+  return result.success ? result.data : null
+}
+
+function ConfigSection() {
+  const { getConfig, loadConfig, newDesign } = useCabinetStore()
+  const [error, setError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleSave = () => {
+    const config = getConfig()
+    const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'cabinet-config.json'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const handleLoad = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setError(null)
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string)
+        const config = validateConfig(data)
+        if (!config) { setError('Invalid config file'); return }
+        loadConfig(config)
+      } catch {
+        setError('Failed to parse file')
+      } finally {
+        e.target.value = ''
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  const btnStyle = {
+    flex: 1, padding: '8px 0',
+    background: 'transparent', border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: 5, color: '#fff', fontSize: T.fs, cursor: 'pointer',
+    letterSpacing: '0.05em',
+  }
+
+  return (
+    <div style={{ padding: '14px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={handleSave} style={btnStyle}>Save</button>
+        <button onClick={() => fileInputRef.current?.click()} style={btnStyle}>Load</button>
+        <button onClick={newDesign} style={{ ...btnStyle, color: '#f99' }}>New</button>
+        <input ref={fileInputRef} type="file" accept=".json" onChange={handleLoad} style={{ display: 'none' }} />
+      </div>
+      {error && <div style={{ fontSize: T.fsSub, color: '#f66' }}>{error}</div>}
+    </div>
+  )
+}
+
 export default function Controls() {
   const { draggingModelId } = useCabinetStore()
   const [pickerTarget, setPickerTarget] = useState<PickerTarget>(null)
   const [open, setOpen] = useState({
+    config: true,
     dimensions: true,
     cabinets: true,
     shelves: false,
@@ -354,6 +448,9 @@ export default function Controls() {
         userSelect: 'none',
         pointerEvents: draggingModelId ? 'none' : 'auto',
       }}>
+        <SectionHeader label="Config" open={open.config} onToggle={() => toggle('config')} />
+        {open.config && <ConfigSection />}
+
         <SectionHeader label="Dimensions" open={open.dimensions} onToggle={() => toggle('dimensions')} />
         {open.dimensions && <DimensionsSection />}
 

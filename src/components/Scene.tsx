@@ -158,7 +158,7 @@ export default function Scene() {
     <DragProvider>
       <Canvas
         camera={{ position: [2, 1.8, 3], fov: 45 }}
-        shadows
+        shadows="pcf"
         className="w-full h-full"
       >
         <Suspense fallback={null}>

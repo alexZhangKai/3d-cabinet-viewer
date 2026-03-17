@@ -1,0 +1,132 @@
+{
+  "version": 1,
+  "height": 1.8,
+  "depth": 0.7,
+  "thickness": 0.017,
+  "cabinets": [
+    {
+      "id": "cabinet-1",
+      "width": 1,
+      "shelves": [
+        0.45425000000000004,
+        0.9,
+        1.29814498567546
+      ]
+    },
+    {
+      "id": "cabinet-2",
+      "width": 0.75,
+      "shelves": [
+        0.9
+      ]
+    },
+    {
+      "id": "cabinet-3",
+      "width": 1,
+      "shelves": [
+        0.94990160158328,
+        1.133739756611861,
+        1.34575,
+        1.5752049767358096
+      ]
+    }
+  ],
+  "placedModels": [
+    {
+      "instanceId": "cfb10e87-aa72-4b9c-a54d-1e926c5dd064",
+      "cabinetId": "cabinet-2",
+      "shelfIndex": 0,
+      "modelId": "43222"
+    },
+    {
+      "instanceId": "69cf3e0e-4757-4c53-8a62-dffc38e94e6f",
+      "cabinetId": "cabinet-2",
+      "shelfIndex": -1,
+      "modelId": "71043"
+    },
+    {
+      "instanceId": "337687a2-7b4e-4249-9466-c3352f7b5b3a",
+      "cabinetId": "cabinet-3",
+      "shelfIndex": 2,
+      "modelId": "42083"
+    },
+    {
+      "instanceId": "1bd880ac-de52-477c-95fb-aeacd1ebbd56",
+      "cabinetId": "cabinet-3",
+      "shelfIndex": 0,
+      "modelId": "42096"
+    },
+    {
+      "instanceId": "fd991965-aa97-4940-858f-323764d41713",
+      "cabinetId": "cabinet-3",
+      "shelfIndex": 3,
+      "modelId": "42115"
+    },
+    {
+      "instanceId": "032bcebf-7c54-4419-b47a-becb1146bc1a",
+      "cabinetId": "cabinet-3",
+      "shelfIndex": 1,
+      "modelId": "42143"
+    },
+    {
+      "instanceId": "a8460910-4e2a-4365-8acd-867873abd291",
+      "cabinetId": "cabinet-1",
+      "shelfIndex": -1,
+      "modelId": "10297"
+    },
+    {
+      "instanceId": "cf2d4a20-f181-4c4c-97b0-cc4e44b7fc05",
+      "cabinetId": "cabinet-1",
+      "shelfIndex": -1,
+      "modelId": "10326"
+    },
+    {
+      "instanceId": "d981ec1c-9619-4022-8810-97d795139a81",
+      "cabinetId": "cabinet-1",
+      "shelfIndex": -1,
+      "modelId": "10312"
+    },
+    {
+      "instanceId": "6a3c6638-90a4-4974-8a53-2639d2ba058d",
+      "cabinetId": "cabinet-1",
+      "shelfIndex": 0,
+      "modelId": "10350"
+    },
+    {
+      "instanceId": "f1294630-777f-4c71-9e03-96ef3f22e564",
+      "cabinetId": "cabinet-1",
+      "shelfIndex": 0,
+      "modelId": "10255"
+    },
+    {
+      "instanceId": "3bcd558f-d921-4d2b-8fd1-5c9aa8f55c43",
+      "cabinetId": "cabinet-1",
+      "shelfIndex": 0,
+      "modelId": "10278"
+    },
+    {
+      "instanceId": "f3f709ce-20d5-48e5-a57e-03503c0893ad",
+      "cabinetId": "cabinet-1",
+      "shelfIndex": 1,
+      "modelId": "21322"
+    },
+    {
+      "instanceId": "65ab3cab-b2e3-440a-b900-ef17c28470f2",
+      "cabinetId": "cabinet-1",
+      "shelfIndex": 2,
+      "modelId": "10256"
+    },
+    {
+      "instanceId": "720f385f-be5b-4bea-b8c4-9bbe5a6c90db",
+      "cabinetId": "cabinet-3",
+      "shelfIndex": -1,
+      "modelId": "76269"
+    },
+    {
+      "instanceId": "9016b272-f5ee-4eed-98f0-c6b19be42982",
+      "cabinetId": "cabinet-3",
+      "shelfIndex": -1,
+      "modelId": "71741"
+    }
+  ]
+}
