@@ -105,8 +105,6 @@ export const DISPLAY_MODELS: DisplayModel[] = [
   { id: '10340', name: 'Christmas Tree', heightM: 0.40, widthM: 0.22, depthM: 0.22 },
   { id: '75309', name: 'Republic Gunship', heightM: 0.20, widthM: 0.52, depthM: 0.38 },
   { id: '43226', name: "Belle and the Beast's Castle", heightM: 0.32, widthM: 0.42, depthM: 0.26 },
-  { id: '76989', name: 'Halo Spartan Collection', heightM: 0.22, widthM: 0.26, depthM: 0.10 },
-  { id: '21336', name: 'The Office', heightM: 0.23, widthM: 0.38, depthM: 0.25 },
 ]
 
 export const MODEL_COLORS = [

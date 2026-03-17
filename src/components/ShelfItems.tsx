@@ -1,8 +1,49 @@
 import { useCabinetStore } from '../store'
-import { DISPLAY_MODELS, modelColor } from '../data/displayModels'
-import { Text } from '@react-three/drei'
+import { DISPLAY_MODELS, type DisplayModel } from '../data/displayModels'
+import { Text, useTexture } from '@react-three/drei'
 
 const GAP = 0.005
+
+type ItemProps = {
+  model: DisplayModel
+  centerX: number
+  centerY: number
+  centerZ: number
+  renderDepth: number
+  hasFitIssue: boolean
+  instanceId: string
+}
+
+function ShelfItem({ model, centerX, centerY, centerZ, renderDepth, hasFitIssue, instanceId }: ItemProps) {
+  const texture = useTexture(`/textures/sets/${model.id}.jpg`)
+
+  return (
+    <group key={instanceId}>
+      <mesh position={[centerX, centerY, centerZ]}>
+        <boxGeometry args={[model.widthM, model.heightM, renderDepth]} />
+        <meshStandardMaterial
+          map={texture}
+          emissive={hasFitIssue ? '#ff0000' : '#000000'}
+          emissiveIntensity={hasFitIssue ? 0.4 : 0}
+          roughness={0.4}
+          metalness={0.1}
+        />
+      </mesh>
+      {model.widthM > 0.08 && (
+        <Text
+          position={[centerX, centerY, centerZ + renderDepth / 2 + 0.001]}
+          fontSize={0.025}
+          color="#fff"
+          anchorX="center"
+          anchorY="middle"
+          maxWidth={model.widthM - 0.01}
+        >
+          {model.name}
+        </Text>
+      )}
+    </group>
+  )
+}
 
 type Props = {
   cabinetId: string
@@ -16,7 +57,6 @@ export default function ShelfItems({ cabinetId, width, depth, thickness: T, shel
   const { placedModels, height } = useCabinetStore()
   const cabinetModels = placedModels.filter((m) => m.cabinetId === cabinetId)
 
-  // Build compartment list: floor (-1) + intermediate shelves (0, 1, ...)
   const allCompartments: Array<{ shelfY: number; shelfIndex: number }> = [
     { shelfY: T / 2, shelfIndex: -1 },
     ...shelves.map((shelfY, shelfIndex) => ({ shelfY, shelfIndex })),
@@ -52,30 +92,16 @@ export default function ShelfItems({ cabinetId, width, depth, thickness: T, shel
           cursor += model.widthM + GAP
 
           return (
-            <group key={placed.instanceId}>
-              <mesh position={[centerX, centerY, centerZ]}>
-                <boxGeometry args={[model.widthM, model.heightM, renderDepth]} />
-                <meshStandardMaterial
-                  color={modelColor(model.id)}
-                  emissive={hasFitIssue ? '#ff0000' : '#000000'}
-                  emissiveIntensity={hasFitIssue ? 0.4 : 0}
-                  roughness={0.4}
-                  metalness={0.1}
-                />
-              </mesh>
-              {model.widthM > 0.08 && (
-                <Text
-                  position={[centerX, centerY, centerZ + renderDepth / 2 + 0.001]}
-                  fontSize={0.025}
-                  color="#fff"
-                  anchorX="center"
-                  anchorY="middle"
-                  maxWidth={model.widthM - 0.01}
-                >
-                  {model.name}
-                </Text>
-              )}
-            </group>
+            <ShelfItem
+              key={placed.instanceId}
+              instanceId={placed.instanceId}
+              model={model}
+              centerX={centerX}
+              centerY={centerY}
+              centerZ={centerZ}
+              renderDepth={renderDepth}
+              hasFitIssue={hasFitIssue}
+            />
           )
         })
       })}

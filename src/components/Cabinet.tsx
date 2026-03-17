@@ -1,6 +1,3 @@
-const wood = <meshStandardMaterial color="#c8a96e" roughness={0.6} metalness={0.05} />
-const darkWood = <meshStandardMaterial color="#8b5e3c" roughness={0.7} metalness={0.0} />
-
 import { Vector3 } from 'three'
 import CabinetHandles from './CabinetHandles'
 import CabinetMeasurements from './CabinetMeasurements'
@@ -19,6 +16,9 @@ type CabinetProps = {
 }
 
 export default function Cabinet({ id, position, height, width, depth, shelves, thickness, showHeightMeasurement = true }: CabinetProps) {
+  const wood = <meshStandardMaterial color="#c8a96e" roughness={0.6} metalness={0.05} />
+  const darkWood = <meshStandardMaterial color="#8b5e3c" roughness={0.7} metalness={0.0} />
+
   return (
     <group castShadow position={position}>
       {/* Bottom */}
