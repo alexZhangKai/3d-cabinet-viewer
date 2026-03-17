@@ -26,8 +26,10 @@ export default function App() {
     : null
 
   return (
-    <div className="w-screen h-screen relative">
-      <Scene />
+    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+      <div style={{ flex: 1, position: 'relative', minWidth: 0 }}>
+        <Scene />
+      </div>
       <Controls />
       {draggingModel && (
         <div style={{

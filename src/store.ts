@@ -23,6 +23,9 @@ interface CabinetState {
   draggingModelId: string | null
   setWidth: (id: string, width: number) => void
   setShelf: (id: string, shelfIndex: number, y: number) => void
+  setGlobalHeight: (h: number) => void
+  setGlobalDepth: (d: number) => void
+  setThickness: (t: number) => void
   addCabinet: () => void
   removeCabinet: (id: string) => void
   addShelf: (id: string) => void
@@ -153,6 +156,10 @@ export const useCabinetStore = create<CabinetState>((set, get) => ({
       placedModels: state.placedModels.filter((m) => m.instanceId !== instanceId),
     }))
   },
+
+  setGlobalHeight: (h) => set({ height: Math.max(0.5, Math.min(3.0, h)) }),
+  setGlobalDepth: (d) => set({ depth: Math.max(0.2, Math.min(1.5, d)) }),
+  setThickness: (t) => set({ thickness: Math.max(0.010, Math.min(0.050, t)) }),
 
   startModelDrag: (modelId) => set({ draggingModelId: modelId }),
   endModelDrag: () => set({ draggingModelId: null }),
