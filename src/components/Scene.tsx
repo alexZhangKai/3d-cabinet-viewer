@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { OrbitControls, Environment, Text, Line } from '@react-three/drei'
 import Cabinet from './Cabinet'
@@ -157,10 +158,12 @@ export default function Scene() {
     <DragProvider>
       <Canvas
         camera={{ position: [2, 1.8, 3], fov: 45 }}
-        shadows
+        shadows="pcf"
         className="w-full h-full"
       >
-        <SceneContent />
+        <Suspense fallback={null}>
+          <SceneContent />
+        </Suspense>
       </Canvas>
     </DragProvider>
   )

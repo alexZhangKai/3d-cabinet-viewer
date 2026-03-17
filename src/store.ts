@@ -14,6 +14,15 @@ export type PlacedModel = {
   modelId: string
 }
 
+export type CabinetConfig = {
+  version: number
+  height: number
+  depth: number
+  thickness: number
+  cabinets: CabinetSpec[]
+  placedModels: PlacedModel[]
+}
+
 interface CabinetState {
   height: number
   depth: number
@@ -23,14 +32,21 @@ interface CabinetState {
   draggingModelId: string | null
   setWidth: (id: string, width: number) => void
   setShelf: (id: string, shelfIndex: number, y: number) => void
+  setGlobalHeight: (h: number) => void
+  setGlobalDepth: (d: number) => void
+  setThickness: (t: number) => void
   addCabinet: () => void
   removeCabinet: (id: string) => void
   addShelf: (id: string) => void
   removeShelf: (id: string, shelfIndex: number) => void
   placeDisplayModel: (cabinetId: string, shelfIndex: number, modelId: string) => void
   removePlacedModel: (instanceId: string) => void
+  movePlacedModelBefore: (draggedId: string, targetId: string) => void
   startModelDrag: (modelId: string) => void
   endModelDrag: () => void
+  loadConfig: (config: CabinetConfig) => void
+  getConfig: () => CabinetConfig
+  newDesign: () => void
 }
 
 export const useCabinetStore = create<CabinetState>((set, get) => ({
@@ -154,6 +170,51 @@ export const useCabinetStore = create<CabinetState>((set, get) => ({
     }))
   },
 
+  movePlacedModelBefore: (draggedId, targetId) => {
+    set((state) => {
+      if (draggedId === targetId) return state
+      const dragged = state.placedModels.find((m) => m.instanceId === draggedId)
+      const target = state.placedModels.find((m) => m.instanceId === targetId)
+      if (!dragged || !target) return state
+      if (dragged.cabinetId !== target.cabinetId || dragged.shelfIndex !== target.shelfIndex) return state
+      const result = state.placedModels.filter((m) => m.instanceId !== draggedId)
+      const targetIdx = result.findIndex((m) => m.instanceId === targetId)
+      result.splice(targetIdx, 0, dragged)
+      return { placedModels: result }
+    })
+  },
+
+  setGlobalHeight: (h) => set({ height: Math.max(0.5, Math.min(3.0, h)) }),
+  setGlobalDepth: (d) => set({ depth: Math.max(0.2, Math.min(1.5, d)) }),
+  setThickness: (t) => set({ thickness: Math.max(0.010, Math.min(0.050, t)) }),
+
   startModelDrag: (modelId) => set({ draggingModelId: modelId }),
   endModelDrag: () => set({ draggingModelId: null }),
+
+  getConfig: () => {
+    const { height, depth, thickness, cabinets, placedModels } = get()
+    return { version: 1, height, depth, thickness, cabinets, placedModels }
+  },
+
+  loadConfig: (config) => {
+    set({
+      height: config.height,
+      depth: config.depth,
+      thickness: config.thickness,
+      cabinets: config.cabinets,
+      placedModels: config.placedModels,
+    })
+  },
+
+  newDesign: () => {
+    const { height, thickness } = get()
+    set({
+      cabinets: [{
+        id: crypto.randomUUID(),
+        width: 0.8,
+        shelves: [(height - thickness * 2) / 2 + thickness],
+      }],
+      placedModels: [],
+    })
+  },
 }))

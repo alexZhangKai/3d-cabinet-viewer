@@ -6,8 +6,15 @@ import { useCabinetStore } from './store'
 import { DISPLAY_MODELS, modelColor } from './data/displayModels'
 
 export default function App() {
-  const { draggingModelId, endModelDrag } = useCabinetStore()
+  const { draggingModelId, endModelDrag, loadConfig } = useCabinetStore()
   const [mouse, setMouse] = useState({ x: 0, y: 0 })
+
+  useEffect(() => {
+    fetch('/default-config.json')
+      .then((r) => r.json())
+      .then(loadConfig)
+      .catch(() => { })
+  })
 
   useEffect(() => {
     if (!draggingModelId) return
@@ -26,8 +33,10 @@ export default function App() {
     : null
 
   return (
-    <div className="w-screen h-screen relative">
-      <Scene />
+    <div style={{ display: 'flex', width: '100vw', height: '100vh', overflow: 'hidden' }}>
+      <div style={{ flex: 1, position: 'relative', minWidth: 0 }}>
+        <Scene />
+      </div>
       <Controls />
       {draggingModel && (
         <div style={{
