@@ -8,6 +8,7 @@ import { DISPLAY_MODELS, modelColor } from './data/displayModels'
 export default function App() {
   const { draggingModelId, endModelDrag, loadConfig } = useCabinetStore()
   const [mouse, setMouse] = useState({ x: 0, y: 0 })
+  const [controlsVisible, setControlsVisible] = useState(true)
 
   useEffect(() => {
     fetch('/default-config.json')
@@ -37,7 +38,16 @@ export default function App() {
       <div style={{ flex: 1, position: 'relative', minWidth: 0 }}>
         <Scene />
       </div>
-      <Controls />
+      <button
+        onClick={() => setControlsVisible((v) => !v)}
+        style={{
+          position: 'fixed', top: 12, right: controlsVisible ? 372 : 12, zIndex: 100,
+          background: 'rgba(40,40,40,0.9)', border: '1px solid rgba(255,255,255,0.12)',
+          borderRadius: 6, color: 'rgba(255,255,255,0.6)', cursor: 'pointer',
+          padding: '6px 10px', fontSize: 14, lineHeight: 1,
+        }}
+      >{controlsVisible ? '⟩' : '⟨'}</button>
+      {controlsVisible && <Controls />}
       {draggingModel && (
         <div style={{
           position: 'fixed',
